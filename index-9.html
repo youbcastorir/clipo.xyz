@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!--
+robots.txt:
+User-agent: *
+Allow: /
+Sitemap: https://yourdomain.com/sitemap.xml
+
+sitemap.xml:
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://yourdomain.com/</loc><changefreq>monthly</changefreq><priority>1.0</priority></url>
+</urlset>
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="ReplyAI – Generate smart AI replies for email, WhatsApp, LinkedIn and social media in seconds.">
+<meta name="keywords" content="AI reply generator, email reply, WhatsApp reply, LinkedIn reply, smart replies">
+<meta property="og:title" content="ReplyAI – Smart Reply Generator">
+<meta property="og:description" content="Generate smart AI-powered replies for any platform instantly.">
+<meta property="og:type" content="website">
+<title>ReplyAI – Smart Reply Generator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root{
+    --bg:#080b10;
+    --surface:rgba(255,255,255,.04);
+    --border:rgba(0,200,255,.15);
+    --neon:#00c8ff;
+    --neon2:#0070ff;
+    --text:#e8f0fe;
+    --muted:#667a94;
+    --radius:14px;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'DM Sans',sans-serif;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+
+  /* Background grid */
+  body::before{
+    content:'';
+    position:fixed;inset:0;
+    background-image:
+      linear-gradient(rgba(0,200,255,.04) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(0,200,255,.04) 1px,transparent 1px);
+    background-size:40px 40px;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  /* Glow blobs */
+  .blob{
+    position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;opacity:.35;
+  }
+  .blob1{width:400px;height:400px;top:-100px;left:-100px;background:radial-gradient(circle,#0050ff,transparent 70%);}
+  .blob2{width:300px;height:300px;bottom:-80px;right:-80px;background:radial-gradient(circle,#00c8ff,transparent 70%);}
+
+  header{
+    position:relative;z-index:1;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:22px 32px;
+    border-bottom:1px solid var(--border);
+    backdrop-filter:blur(10px);
+  }
+
+  .logo{
+    font-family:'Syne',sans-serif;
+    font-size:1.4rem;font-weight:800;
+    background:linear-gradient(90deg,var(--neon),var(--neon2));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    letter-spacing:-.5px;
+  }
+
+  .logo span{
+    display:inline-block;
+    background:linear-gradient(90deg,var(--neon),#fff);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  }
+
+  .badge{
+    font-size:.7rem;font-weight:500;
+    padding:3px 10px;border-radius:99px;
+    border:1px solid var(--border);
+    color:var(--neon);
+    background:rgba(0,200,255,.07);
+  }
+
+  main{
+    position:relative;z-index:1;
+    max-width:720px;margin:0 auto;
+    padding:48px 20px 80px;
+  }
+
+  h1{
+    font-family:'Syne',sans-serif;
+    font-size:clamp(2rem,5vw,3rem);
+    font-weight:800;
+    line-height:1.1;
+    margin-bottom:10px;
+  }
+
+  h1 em{
+    font-style:normal;
+    background:linear-gradient(90deg,var(--neon),var(--neon2));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  }
+
+  .sub{color:var(--muted);font-size:.95rem;margin-bottom:36px;}
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:24px;
+    backdrop-filter:blur(16px);
+    margin-bottom:20px;
+    animation:fadeUp .4s ease both;
+  }
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+  label{
+    display:block;
+    font-size:.78rem;font-weight:500;
+    color:var(--muted);
+    text-transform:uppercase;letter-spacing:.08em;
+    margin-bottom:8px;
+  }
+
+  textarea{
+    width:100%;
+    background:rgba(255,255,255,.03);
+    border:1px solid var(--border);
+    border-radius:10px;
+    color:var(--text);
+    font-family:'DM Sans',sans-serif;
+    font-size:.95rem;
+    padding:14px;
+    resize:vertical;
+    min-height:120px;
+    outline:none;
+    transition:border .2s;
+  }
+
+  textarea:focus{border-color:var(--neon);}
+
+  .tones{
+    display:flex;gap:8px;flex-wrap:wrap;
+    margin-top:16px;
+  }
+
+  .tone-btn{
+    cursor:pointer;
+    padding:7px 16px;
+    border-radius:99px;
+    border:1px solid var(--border);
+    background:transparent;
+    color:var(--muted);
+    font-family:'DM Sans',sans-serif;
+    font-size:.85rem;
+    transition:all .18s;
+  }
+
+  .tone-btn:hover{border-color:var(--neon);color:var(--text);}
+  .tone-btn.active{
+    background:rgba(0,200,255,.12);
+    border-color:var(--neon);
+    color:var(--neon);
+  }
+
+  .platform-row{
+    display:flex;gap:8px;flex-wrap:wrap;
+    margin-top:16px;
+  }
+
+  .plat-btn{
+    cursor:pointer;
+    padding:6px 14px;
+    border-radius:8px;
+    border:1px solid var(--border);
+    background:transparent;
+    color:var(--muted);
+    font-size:.82rem;
+    font-family:'DM Sans',sans-serif;
+    transition:all .18s;
+  }
+
+  .plat-btn:hover{border-color:var(--neon);color:var(--text);}
+  .plat-btn.active{background:rgba(0,112,255,.12);border-color:var(--neon2);color:#6eb8ff;}
+
+  .gen-btn{
+    width:100%;margin-top:20px;
+    padding:14px;
+    border:none;border-radius:var(--radius);
+    background:linear-gradient(90deg,var(--neon2),var(--neon));
+    color:#000;
+    font-family:'Syne',sans-serif;
+    font-size:1rem;font-weight:700;
+    cursor:pointer;
+    transition:opacity .2s,transform .1s;
+    position:relative;overflow:hidden;
+  }
+
+  .gen-btn:hover{opacity:.9;}
+  .gen-btn:active{transform:scale(.98);}
+  .gen-btn:disabled{opacity:.5;cursor:not-allowed;}
+
+  .gen-btn .spinner{
+    display:none;
+    width:18px;height:18px;
+    border:2px solid rgba(0,0,0,.3);
+    border-top-color:#000;
+    border-radius:50%;
+    animation:spin .7s linear infinite;
+    margin:0 auto;
+  }
+
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .result-card{
+    display:none;
+    animation:fadeUp .35s ease both;
+  }
+
+  .result-header{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:14px;
+  }
+
+  .result-label{
+    font-family:'Syne',sans-serif;
+    font-size:.85rem;font-weight:700;
+    color:var(--neon);
+    text-transform:uppercase;letter-spacing:.06em;
+  }
+
+  .copy-btn{
+    cursor:pointer;
+    padding:6px 14px;
+    border-radius:8px;
+    border:1px solid var(--border);
+    background:rgba(0,200,255,.06);
+    color:var(--neon);
+    font-size:.8rem;
+    font-family:'DM Sans',sans-serif;
+    transition:all .18s;
+  }
+
+  .copy-btn:hover{background:rgba(0,200,255,.14);}
+  .copy-btn.copied{background:rgba(0,255,150,.1);border-color:rgba(0,255,150,.3);color:#00ff96;}
+
+  .reply-text{
+    line-height:1.7;
+    font-size:.95rem;
+    white-space:pre-wrap;
+    color:var(--text);
+  }
+
+  /* History */
+  .history-section{margin-top:10px;}
+
+  .history-title{
+    font-family:'Syne',sans-serif;
+    font-size:.82rem;font-weight:700;
+    color:var(--muted);
+    text-transform:uppercase;letter-spacing:.08em;
+    margin-bottom:12px;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+
+  .clear-btn{
+    cursor:pointer;font-size:.75rem;
+    background:none;border:none;
+    color:var(--muted);
+    transition:color .15s;
+    font-family:'DM Sans',sans-serif;
+  }
+  .clear-btn:hover{color:#ff4d6d;}
+
+  .history-list{
+    display:flex;flex-direction:column;gap:8px;
+    max-height:260px;overflow-y:auto;
+    scrollbar-width:thin;scrollbar-color:var(--border) transparent;
+  }
+
+  .hist-item{
+    background:rgba(255,255,255,.025);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:12px 14px;
+    cursor:pointer;
+    transition:border-color .18s;
+  }
+
+  .hist-item:hover{border-color:var(--neon);}
+
+  .hist-meta{
+    font-size:.73rem;color:var(--muted);
+    margin-bottom:4px;
+    display:flex;gap:8px;
+  }
+
+  .hist-tag{
+    padding:2px 7px;border-radius:99px;
+    background:rgba(0,200,255,.08);
+    color:var(--neon);font-size:.7rem;
+  }
+
+  .hist-preview{
+    font-size:.84rem;color:var(--text);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+
+  footer{
+    position:relative;z-index:1;
+    text-align:center;padding:24px;
+    color:var(--muted);font-size:.78rem;
+    border-top:1px solid var(--border);
+  }
+
+  @media(max-width:480px){
+    header{padding:16px;}
+    main{padding:32px 16px 60px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="blob blob1"></div>
+<div class="blob blob2"></div>
+
+<header>
+  <div class="logo">Reply<span>AI</span></div>
+  <div class="badge">✦ AI-Powered</div>
+</header>
+
+<main>
+  <h1>Replies that<br><em>actually work.</em></h1>
+  <p class="sub">Generate smart replies for Email, WhatsApp, LinkedIn & Social — instantly.</p>
+
+  <div class="card" style="animation-delay:.05s">
+    <label>Your message or context</label>
+    <textarea id="msg" placeholder="Paste the message you received or describe the situation…"></textarea>
+
+    <div style="margin-top:16px">
+      <label>Platform</label>
+      <div class="platform-row" id="platforms">
+        <button class="plat-btn active" data-p="Email">📧 Email</button>
+        <button class="plat-btn" data-p="WhatsApp">💬 WhatsApp</button>
+        <button class="plat-btn" data-p="LinkedIn">💼 LinkedIn</button>
+        <button class="plat-btn" data-p="Social">🌐 Social</button>
+      </div>
+    </div>
+
+    <div style="margin-top:16px">
+      <label>Tone</label>
+      <div class="tones" id="tones">
+        <button class="tone-btn active" data-t="Professional">Professional</button>
+        <button class="tone-btn" data-t="Friendly">Friendly</button>
+        <button class="tone-btn" data-t="Casual">Casual</button>
+        <button class="tone-btn" data-t="Support">Support</button>
+      </div>
+    </div>
+
+    <button class="gen-btn" id="genBtn" onclick="generate()">
+      <span id="btnText">⚡ Generate Reply</span>
+      <div class="spinner" id="spinner"></div>
+    </button>
+  </div>
+
+  <div class="card result-card" id="resultCard">
+    <div class="result-header">
+      <div class="result-label" id="resultLabel">Reply</div>
+      <button class="copy-btn" id="copyBtn" onclick="copyReply()">Copy</button>
+    </div>
+    <div class="reply-text" id="replyText"></div>
+  </div>
+
+  <div class="card history-section" id="histSection" style="display:none;animation-delay:.1s">
+    <div class="history-title">
+      Recent Replies
+      <button class="clear-btn" onclick="clearHistory()">Clear all</button>
+    </div>
+    <div class="history-list" id="histList"></div>
+  </div>
+</main>
+
+<footer>© 2026 ReplyAI · Built for speed &amp; simplicity</footer>
+
+<script>
+const STORAGE_KEY='replyai_history';
+let platform='Email', tone='Professional';
+
+// Selector logic
+document.getElementById('platforms').addEventListener('click',e=>{
+  const b=e.target.closest('.plat-btn');if(!b)return;
+  document.querySelectorAll('.plat-btn').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');platform=b.dataset.p;
+});
+
+document.getElementById('tones').addEventListener('click',e=>{
+  const b=e.target.closest('.tone-btn');if(!b)return;
+  document.querySelectorAll('.tone-btn').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');tone=b.dataset.t;
+});
+
+// Reply templates per tone
+const T={
+  Professional:{
+    opener:["Thank you for reaching out.","I appreciate your message.","Thank you for your email."],
+    ack:["I understand your point completely.","I've reviewed your message carefully.","I fully understand the situation."],
+    close:["Please let me know if you need any further assistance.","I look forward to your response.","Feel free to reach out with any questions."]
+  },
+  Friendly:{
+    opener:["Hey, thanks so much for getting in touch!","Hi! Great to hear from you!","Thanks for reaching out — I really appreciate it!"],
+    ack:["I totally get what you mean.","That makes a lot of sense.","I hear you on that!"],
+    close:["Let me know if there's anything else I can help with!","Looking forward to hearing back from you!","Happy to chat more whenever!"]
+  },
+  Casual:{
+    opener:["Hey!","Sure, no worries.","Got your message!"],
+    ack:["Yeah, I get it.","Makes sense.","Totally understand."],
+    close:["Lmk if you need anything else.","Hit me up anytime.","Catch you later!"]
+  },
+  Support:{
+    opener:["Thank you for contacting us.","I'm sorry to hear you're experiencing this issue.","We appreciate you bringing this to our attention."],
+    ack:["I completely understand how frustrating this must be.","I can see why this would be a concern.","Your experience is important to us."],
+    close:["Please don't hesitate to reach out if the issue persists.","We're here 24/7 should you need further assistance.","Your satisfaction is our priority."]
+  }
+};
+
+const P={
+  Email:   m=>`Subject: Re: Your Message\n\n${m}`,
+  WhatsApp:m=>m,
+  LinkedIn:m=>`Hi there,\n\n${m}\n\nBest,\n[Your Name]`,
+  Social:  m=>`${m} 👊`
+};
+
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+
+function buildReply(msg){
+  const t=T[tone];
+  const base=msg.trim();
+  const isQuestion=/\?/.test(base);
+
+  let body='';
+  if(isQuestion){
+    body=`Regarding your question — ${base.length<60?'that\'s a great point to clarify. ':''}I\'d be happy to provide clarity on this. Based on the context provided, the best approach would be to address it directly and ensure we\'re aligned on expectations.`;
+  } else {
+    body=`I've taken note of everything you mentioned. ${base.length>80?'The details you shared are helpful and I want to make sure we address each point thoroughly. ':''}I\'ll make sure this is handled promptly and to the best possible standard.`;
+  }
+
+  let reply=`${pick(t.opener)}\n\n${pick(t.ack)} ${body}\n\n${pick(t.close)}`;
+  return P[platform](reply);
+}
+
+async function generate(){
+  const msg=document.getElementById('msg').value.trim();
+  if(!msg){
+    document.getElementById('msg').focus();
+    document.getElementById('msg').style.borderColor='#ff4d6d';
+    setTimeout(()=>document.getElementById('msg').style.borderColor='',1200);
+    return;
+  }
+
+  const btn=document.getElementById('genBtn');
+  const btnText=document.getElementById('btnText');
+  const spinner=document.getElementById('spinner');
+
+  btn.disabled=true;
+  btnText.style.display='none';
+  spinner.style.display='block';
+
+  await new Promise(r=>setTimeout(r,900+Math.random()*600));
+
+  const reply=buildReply(msg);
+
+  btnText.style.display='';
+  spinner.style.display='none';
+  btn.disabled=false;
+
+  const rc=document.getElementById('resultCard');
+  document.getElementById('replyText').textContent=reply;
+  document.getElementById('resultLabel').textContent=`${tone} · ${platform}`;
+  rc.style.display='block';
+  rc.scrollIntoView({behavior:'smooth',block:'nearest'});
+
+  saveHistory({platform,tone,msg:msg.slice(0,80),reply,ts:Date.now()});
+  renderHistory();
+}
+
+function copyReply(){
+  const text=document.getElementById('replyText').textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    const b=document.getElementById('copyBtn');
+    b.textContent='Copied!';b.classList.add('copied');
+    setTimeout(()=>{b.textContent='Copy';b.classList.remove('copied');},2000);
+  });
+}
+
+function getHistory(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');}catch{return[];}}
+function saveHistory(item){
+  let h=getHistory();
+  h.unshift(item);
+  if(h.length>10)h=h.slice(0,10);
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(h));
+}
+
+function renderHistory(){
+  const h=getHistory();
+  const sec=document.getElementById('histSection');
+  const list=document.getElementById('histList');
+  if(!h.length){sec.style.display='none';return;}
+  sec.style.display='block';
+  list.innerHTML=h.map((x,i)=>`
+    <div class="hist-item" onclick="loadHistory(${i})">
+      <div class="hist-meta">
+        <span class="hist-tag">${x.tone}</span>
+        <span class="hist-tag">${x.platform}</span>
+        <span>${new Date(x.ts).toLocaleDateString()}</span>
+      </div>
+      <div class="hist-preview">${x.msg}</div>
+    </div>
+  `).join('');
+}
+
+function loadHistory(i){
+  const item=getHistory()[i];
+  if(!item)return;
+  document.getElementById('msg').value=item.msg;
+  document.getElementById('replyText').textContent=item.reply;
+  document.getElementById('resultLabel').textContent=`${item.tone} · ${item.platform}`;
+  document.getElementById('resultCard').style.display='block';
+
+  // Sync UI
+  document.querySelectorAll('.plat-btn').forEach(b=>{b.classList.toggle('active',b.dataset.p===item.platform);});
+  document.querySelectorAll('.tone-btn').forEach(b=>{b.classList.toggle('active',b.dataset.t===item.tone);});
+  platform=item.platform;tone=item.tone;
+}
+
+function clearHistory(){
+  localStorage.removeItem(STORAGE_KEY);
+  document.getElementById('histSection').style.display='none';
+}
+
+// Init
+renderHistory();
+</script>
+</body>
+</html>
